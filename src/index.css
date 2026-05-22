@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Caveat:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Cinzel', serif;
+  --font-space: 'Space Grotesk', sans-serif;
+  --font-marker: 'Caveat', cursive;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; transform: scale(1); filter: blur(40px); }
+  50% { opacity: 0.6; transform: scale(1.15); filter: blur(60px); }
+}
+
+.animate-twinkle {
+  animation: twinkle var(--duration, 4s) infinite ease-in-out;
+}
+
+.animate-float-slow {
+  animation: float-slow 7s infinite ease-in-out;
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 25s infinite linear;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 8s infinite ease-in-out;
+}
+
+/* Custom scrollbar for stellar layout */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #010105;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e1e38;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2e2e5c;
+}
+
+body {
+  background-color: #010105;
+  color: #f5f5fa;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}

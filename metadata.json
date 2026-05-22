@@ -1,0 +1,6 @@
+{
+  "name": "Ankit Singh Celestial Birthday",
+  "description": "A cellestial, cosmic-themed interactive birthday celebration applet for Ankit Singh featuring memories, live countdowns, astro-panchang traits, and dynamic Gemini-powered horoscopes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
