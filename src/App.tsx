@@ -184,7 +184,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [restingBpm]);
 
-  // Twinkling Interactive Starfield logic
+  // Twinkling Interactive Starfield logic with Shooting Stars & Click Particle Flares
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -192,7 +192,30 @@ export default function App() {
     if (!ctx) return;
 
     let stars: Array<{ x: number; y: number; radius: number; speed: number; alpha: number; dAlpha: number }> = [];
-    const numStars = 130;
+    const numStars = 135;
+
+    // Shooting star emitters
+    let shootingStars: Array<{
+      x: number;
+      y: number;
+      dx: number;
+      dy: number;
+      length: number;
+      speed: number;
+      opacity: number;
+    }> = [];
+
+    // Click micro-flares
+    let flares: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+      color: string;
+      alpha: number;
+      decay: number;
+    }> = [];
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -223,8 +246,30 @@ export default function App() {
       mouseY = e.clientY;
     };
 
+    const handleCanvasClick = (e: MouseEvent) => {
+      // Create a gorgeous stardust explosion at clicked coordinate
+      const numParticles = 14;
+      const colors = ["#f59e0b", "#ebd4be", "#f5f5fa", "#6366f1", "#f43f5e", "#10b981"];
+      for (let i = 0; i < numParticles; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 1.5;
+        flares.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: Math.random() * 2.2 + 0.8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1.0,
+          decay: Math.random() * 0.022 + 0.015
+        });
+      }
+      playSynthSparkle();
+    };
+
     window.addEventListener("resize", resizeCanvas);
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("click", handleCanvasClick);
     resizeCanvas();
 
     const draw = () => {
@@ -260,8 +305,64 @@ export default function App() {
         if (star.x > canvas.width) star.x = 0;
       });
 
+      // Emitting shooting stars by low probability
+      if (shootingStars.length < 2 && Math.random() < 0.005) {
+        shootingStars.push({
+          x: Math.random() * canvas.width * 0.7,
+          y: Math.random() * canvas.height * 0.3,
+          dx: Math.random() * 5 + 5,
+          dy: Math.random() * 2.5 + 2.5,
+          length: Math.random() * 90 + 50,
+          speed: Math.random() * 2.2 + 3.2,
+          opacity: 1.0
+        });
+      }
+
+      // Update & Draw Shooting Stars
+      shootingStars.forEach((s, idx) => {
+        s.x += (s.dx * s.speed) * 0.15;
+        s.y += (s.dy * s.speed) * 0.15;
+        s.opacity -= 0.016;
+
+        if (s.opacity <= 0 || s.x > canvas.width || s.y > canvas.height) {
+          shootingStars.splice(idx, 1);
+        } else {
+          ctx.beginPath();
+          const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.dx * (s.length / 5), s.y - s.dy * (s.length / 5));
+          grad.addColorStop(0, `rgba(234, 179, 8, ${s.opacity})`); 
+          grad.addColorStop(0.3, `rgba(236, 72, 153, ${s.opacity * 0.6})`); 
+          grad.addColorStop(1, `rgba(99, 102, 241, 0)`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 1.8;
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(s.x - s.dx * (s.length / 5), s.y - s.dy * (s.length / 5));
+          ctx.stroke();
+        }
+      });
+
+      // Particle Flares rendering
+      flares.forEach((f, idx) => {
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vy += 0.04; // cosmic weight gravitational drift
+        f.alpha -= f.decay;
+
+        if (f.alpha <= 0) {
+          flares.splice(idx, 1);
+        } else {
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+          ctx.fillStyle = f.color;
+          ctx.globalAlpha = Math.max(0, f.alpha);
+          ctx.shadowBlur = f.radius * 3.5;
+          ctx.shadowColor = f.color;
+          ctx.fill();
+        }
+      });
+      ctx.globalAlpha = 1.0; // Reset canvas global alpha safety
+      ctx.shadowBlur = 0; // Reset shadow blur safety
+
       // Draw Constellation vectors connecting stars near the mouse cursor
-      ctx.shadowBlur = 0; // reset shadow
       if (mouseX > 0 && mouseY > 0) {
         const mouseRadius = 150;
         stars.forEach((star) => {
@@ -285,6 +386,7 @@ export default function App() {
     return () => {
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("click", handleCanvasClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
